@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} | Catalog CRUD Manager{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-muted">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'manage_products' %}" class="text-muted">Catalog Manager</a></li>
+            <li class="breadcrumb-item active text-white" aria-current="page">{{ title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="p-4 p-md-5 rounded-4 border border-secondary border-opacity-25 shadow-lg" style="background: var(--aura-surface);">
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+                    <div>
+                        <span class="badge-glow mb-1 d-inline-block">DJANGO ORM &bull; CRUD ACTION</span>
+                        <h1 class="h3 fw-bold text-white mb-0">{{ title }}</h1>
+                    </div>
+                    <a href="{% url 'manage_products' %}" class="btn btn-aura-outline btn-sm">
+                        <i class="bi bi-x-lg me-1"></i> Cancel
+                    </a>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="row g-4">
+                        <!-- Category & Brand -->
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted text-uppercase fw-bold">Select Collection / Category *</label>
+                            {{ form.category }}
+                            {% if form.category.errors %}<div class="text-danger small">{{ form.category.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted text-uppercase fw-bold">Brand or Studio Atelier *</label>
+                            {{ form.brand }}
+                            {% if form.brand.errors %}<div class="text-danger small">{{ form.brand.errors }}</div>{% endif %}
+                        </div>
+
+                        <!-- Name -->
+                        <div class="col-12">
+                            <label class="form-label small text-muted text-uppercase fw-bold">Product Title *</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}<div class="text-danger small">{{ form.name.errors }}</div>{% endif %}
+                        </div>
+
+                        <!-- Short Description -->
+                        <div class="col-12">
+                            <label class="form-label small text-muted text-uppercase fw-bold">Punchy 1-Liner Summary *</label>
+                            {{ form.short_description }}
+                            {% if form.short_description.errors %}<div class="text-danger small">{{ form.short_description.errors }}</div>{% endif %}
+                        </div>
+
+                        <!-- Narrative & Full Description -->
+                        <div class="col-12">
+                            <label class="form-label small text-muted text-uppercase fw-bold">Detailed Craft Story & Specifications *</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}<div class="text-danger small">{{ form.description.errors }}</div>{% endif %}
+                        </div>
+
+                        <!-- Price in INR & MRP -->
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted text-uppercase fw-bold">Selling Price (INR ₹) *</label>
+                            {{ form.price }}
+                            {% if form.price.errors %}<div class="text-danger small">{{ form.price.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted text-uppercase fw-bold">Original MRP (INR ₹)</label>
+                            {{ form.original_price }}
+                            {% if form.original_price.errors %}<div class="text-danger small">{{ form.original_price.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted text-uppercase fw-bold">Studio Inventory Units *</label>
+                            {{ form.stock_count }}
+                            {% if form.stock_count.errors %}<div class="text-danger small">{{ form.stock_count.errors }}</div>{% endif %}
+                        </div>
+
+                        <!-- Badge -->
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted text-uppercase fw-bold">Highlight Badge (Optional)</label>
+                            {{ form.badge }}
+                            <small class="text-muted">e.g. 'EXCLUSIVE DROP', 'LIMITED RUN', 'BESTSELLER'</small>
+                        </div>
+
+                        <!-- Image URL -->
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted text-uppercase fw-bold">Image URL</label>
+                            {{ form.image_url }}
+                            <small class="text-muted">Paste high-res Unsplash or studio CDN URL</small>
+                        </div>
+
+                        <!-- Materials & Care -->
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted text-uppercase fw-bold">Material Composition</label>
+                            {{ form.material }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted text-uppercase fw-bold">Care Instructions</label>
+                            {{ form.care_instructions }}
+                        </div>
+
+                        <!-- Visibility Switches -->
+                        <div class="col-12 border-top border-secondary border-opacity-25 pt-3">
+                            <div class="row g-3">
+                                <div class="col-sm-4">
+                                    <div class="form-check form-switch">
+                                        {{ form.is_featured }}
+                                        <label class="form-check-label small text-light" for="{{ form.is_featured.id_for_label }}">Feature on Homepage</label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-check form-switch">
+                                        {{ form.is_trending }}
+                                        <label class="form-check-label small text-light" for="{{ form.is_trending.id_for_label }}">Mark as Trending</label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-check form-switch">
+                                        {{ form.is_new_arrival }}
+                                        <label class="form-check-label small text-light" for="{{ form.is_new_arrival.id_for_label }}">Mark as New Arrival</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="col-12 pt-3">
+                            <button type="submit" class="btn btn-aura-primary px-5 py-3 fs-6">
+                                <i class="bi bi-cloud-arrow-up-fill me-2"></i> Save Changes to Database
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Patron Profile | AURA Studio{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-muted">Home</a></li>
+            <li class="breadcrumb-item active text-white" aria-current="page">Patron Profile</li>
+        </ol>
+    </nav>
+
+    <!-- User Header Card -->
+    <div class="p-4 p-md-5 rounded-4 border border-secondary border-opacity-25 mb-5 shadow-lg" style="background: linear-gradient(135deg, #171a22 0%, #0e1014 100%);">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle d-flex align-items-center justify-content-center bg-warning text-dark fw-bold fs-3" style="width: 64px; height: 64px;">
+                    {{ user.first_name|first|default:user.username|first|upper }}
+                </div>
+                <div>
+                    <h1 class="h3 fw-bold text-white mb-0">{{ user.get_full_name|default:user.username }}</h1>
+                    <span class="text-muted small">{{ user.email }} &bull; Member since {{ user.date_joined|date:"M Y" }}</span>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <a href="{% url 'my_orders' %}" class="btn btn-aura-primary btn-sm">
+                    <i class="bi bi-box-seam me-1"></i> Order History
+                </a>
+                <a href="{% url 'manage_products' %}" class="btn btn-aura-outline btn-sm">
+                    <i class="bi bi-sliders2 me-1"></i> Catalog CRUD
+                </a>
+                <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Recent Orders -->
+        <div class="col-lg-7">
+            <div class="p-4 rounded-3 border border-secondary border-opacity-25 h-100" style="background: var(--aura-surface);">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h5 fw-bold text-white mb-0">Recent Acquisitions</h2>
+                    <a href="{% url 'my_orders' %}" class="small text-warning text-decoration-none">View All <i class="bi bi-arrow-right"></i></a>
+                </div>
+
+                {% if orders %}
+                <div class="d-flex flex-column gap-3">
+                    {% for ord in orders %}
+                    <div class="p-3 rounded-2 border border-secondary border-opacity-25" style="background: var(--aura-surface-elevated);">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <span class="fw-bold text-white font-monospace">{{ ord.order_id }}</span>
+                                <small class="text-muted d-block">{{ ord.created_at|date:"M d, Y" }} &bull; {{ ord.items.count }} items</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="fw-bold text-warning font-monospace">₹{{ ord.total_amount|floatformat:0 }}</span>
+                                <span class="badge bg-warning text-dark font-monospace d-block mt-1">{{ ord.order_status }}</span>
+                            </div>
+                        </div>
+                        <a href="{% url 'order_confirmation' ord.order_id %}" class="small text-warning text-decoration-none">
+                            <i class="bi bi-receipt me-1"></i> View Tax Invoice & Courier Tracking
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted small">
+                    <i class="bi bi-box-seam display-5 d-block mb-2"></i>
+                    No prior acquisitions found.
+                    <div class="mt-2"><a href="{% url 'shop' %}" class="btn btn-aura-primary btn-sm">Explore Studio Catalog</a></div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Saved Pieces Shortcut -->
+        <div class="col-lg-5">
+            <div class="p-4 rounded-3 border border-secondary border-opacity-25 h-100" style="background: var(--aura-surface);">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h5 fw-bold text-white mb-0">Saved Wishlist</h2>
+                    <a href="{% url 'wishlist' %}" class="small text-warning text-decoration-none">Open Wishlist <i class="bi bi-arrow-right"></i></a>
+                </div>
+
+                {% if wishlist_items %}
+                <div class="d-flex flex-column gap-2">
+                    {% for itm in wishlist_items %}
+                    <div class="d-flex align-items-center gap-3 p-2 rounded-2 border border-secondary border-opacity-10" style="background: var(--aura-surface-elevated);">
+                        <img src="{{ itm.main_image }}" alt="{{ itm.name }}" style="width: 48px; height: 52px; object-fit: cover; border-radius: 6px;">
+                        <div class="flex-grow-1 small">
+                            <a href="{% url 'product_detail' itm.slug %}" class="text-white fw-semibold text-decoration-none d-block text-truncate" style="max-width: 170px;">{{ itm.name }}</a>
+                            <span class="text-warning font-monospace">₹{{ itm.price|floatformat:0 }}</span>
+                        </div>
+                        <button class="btn btn-sm btn-warning ajax-add-to-cart-btn" data-product-id="{{ itm.id }}" title="Add to Bag">
+                            <i class="bi bi-bag-plus"></i>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted small">
+                    <i class="bi bi-heart display-5 d-block mb-2"></i>
+                    Your wishlist is currently empty.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Acquisition Confirmed | {{ order.order_id }} | AURA Studio{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Order Success Banner Card -->
+            <div class="text-center p-5 rounded-4 border border-secondary border-opacity-25 mb-4 shadow-lg" style="background: linear-gradient(180deg, #161820 0%, #0e1014 100%);">
+                <div class="mb-4">
+                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 76px; height: 76px; background: rgba(16, 185, 129, 0.15); border: 2px solid #10b981; color: #10b981;">
+                        <i class="bi bi-check-lg display-5"></i>
+                    </span>
+                </div>
+                <span class="badge-glow mb-2 d-inline-block">ORDER CONFIRMED &bull; PAYMENT SECURED</span>
+                <h1 class="display-6 fw-bold text-white mb-2">Thank you, {{ order.full_name }}!</h1>
+                <p class="text-muted small max-w-500 mx-auto mb-4">
+                    Your acquisition has been registered with our studio. A digital invoice with dispatch schedule has been sent to <strong>{{ order.email }}</strong>.
+                </p>
+
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <div class="p-3 rounded-2 border border-secondary border-opacity-25 text-start" style="background: var(--aura-surface); min-width: 180px;">
+                        <small class="text-muted d-block">Order Reference</small>
+                        <strong class="text-warning font-monospace">{{ order.order_id }}</strong>
+                    </div>
+                    <div class="p-3 rounded-2 border border-secondary border-opacity-25 text-start" style="background: var(--aura-surface); min-width: 180px;">
+                        <small class="text-muted d-block">Consignment AWB</small>
+                        <strong class="text-white font-monospace">{{ order.tracking_number }}</strong>
+                    </div>
+                    <div class="p-3 rounded-2 border border-secondary border-opacity-25 text-start" style="background: var(--aura-surface); min-width: 180px;">
+                        <small class="text-muted d-block">Total Remittance</small>
+                        <strong class="text-white font-monospace">₹{{ order.total_amount|floatformat:0 }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Delivery Progress Tracker -->
+            <div class="p-4 rounded-3 border border-secondary border-opacity-25 mb-4" style="background: var(--aura-surface);">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h2 class="h6 fw-bold text-white mb-0"><i class="bi bi-truck text-warning me-2"></i> Pan-India Dispatch Timeline</h2>
+                    <span class="badge bg-warning text-dark font-monospace">{{ order.order_status }}</span>
+                </div>
+                <div class="small text-muted mb-4">Estimated Delivery: <strong>{{ order.estimated_delivery }}</strong> to {{ order.city }}, {{ order.state }}</div>
+
+                <div class="timeline-track">
+                    <div class="timeline-step completed">
+                        <div class="timeline-dot"><i class="bi bi-check2"></i></div>
+                        <div class="timeline-label">Placed</div>
+                    </div>
+                    <div class="timeline-step active">
+                        <div class="timeline-dot"><i class="bi bi-box-seam"></i></div>
+                        <div class="timeline-label">Quality Check</div>
+                    </div>
+                    <div class="timeline-step">
+                        <div class="timeline-dot"><i class="bi bi-airplane"></i></div>
+                        <div class="timeline-label">Express Air</div>
+                    </div>
+                    <div class="timeline-step">
+                        <div class="timeline-dot"><i class="bi bi-geo-alt"></i></div>
+                        <div class="timeline-label">Out for Delivery</div>
+                    </div>
+                    <div class="timeline-step">
+                        <div class="timeline-dot"><i class="bi bi-house-check"></i></div>
+                        <div class="timeline-label">Delivered</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Items & Shipping Address Details -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="p-4 rounded-3 border border-secondary border-opacity-25 h-100" style="background: var(--aura-surface);">
+                        <h2 class="h6 fw-bold text-white mb-3"><i class="bi bi-geo-fill text-warning me-2"></i> Delivery Destination</h2>
+                        <div class="small text-muted leading-relaxed">
+                            <strong class="text-white d-block mb-1">{{ order.full_name }}</strong>
+                            {{ order.address_line1 }}<br>
+                            {% if order.address_line2 %}{{ order.address_line2 }}<br>{% endif %}
+                            {{ order.city }}, {{ order.state }} - <strong>{{ order.pincode }}</strong><br>
+                            Phone: {{ order.phone }}<br>
+                            Payment Mode: <span class="badge bg-secondary text-uppercase">{{ order.payment_method }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="p-4 rounded-3 border border-secondary border-opacity-25 h-100" style="background: var(--aura-surface);">
+                        <h2 class="h6 fw-bold text-white mb-3"><i class="bi bi-receipt text-warning me-2"></i> Invoice Summary (INR)</h2>
+                        <div class="small">
+                            <div class="d-flex justify-content-between text-muted mb-1">
+                                <span>Subtotal</span>
+                                <span class="text-white">₹{{ order.subtotal|floatformat:0 }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted mb-1">
+                                <span>GST (12%)</span>
+                                <span class="text-white">₹{{ order.tax|floatformat:0 }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted mb-1">
+                                <span>Pan-India Courier</span>
+                                <span class="text-white">{% if order.shipping_fee == 0 %}FREE{% else %}₹{{ order.shipping_fee|floatformat:0 }}{% endif %}</span>
+                            </div>
+                            {% if order.discount > 0 %}
+                            <div class="d-flex justify-content-between text-success mb-1">
+                                <span>Token Discount</span>
+                                <span>-₹{{ order.discount|floatformat:0 }}</span>
+                            </div>
+                            {% endif %}
+                            <hr class="border-secondary opacity-25 my-2">
+                            <div class="d-flex justify-content-between fw-bold text-white fs-6">
+                                <span>Grand Total Paid</span>
+                                <span class="text-warning">₹{{ order.total_amount|floatformat:0 }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ordered Pieces List -->
+            <div class="p-4 rounded-3 border border-secondary border-opacity-25 mb-4" style="background: var(--aura-surface);">
+                <h2 class="h6 fw-bold text-white mb-3">Acquired Pieces ({{ order.items.count }})</h2>
+                <div class="d-flex flex-column gap-3">
+                    {% for itm in order.items.all %}
+                    <div class="d-flex align-items-center gap-3 pb-3 {% if not forloop.last %}border-bottom border-secondary border-opacity-10{% endif %}">
+                        <img src="{{ itm.product_image }}" alt="{{ itm.product_name }}" style="width: 60px; height: 68px; object-fit: cover; border-radius: 8px;">
+                        <div class="flex-grow-1 small">
+                            <div class="fw-bold text-white">{{ itm.product_name }}</div>
+                            <div class="text-muted">{{ itm.quantity }}x &bull; {{ itm.variant_info|default:"Standard" }}</div>
+                        </div>
+                        <div class="text-end fw-bold text-white font-monospace">
+                            ₹{{ itm.total_price|floatformat:0 }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <button class="btn btn-aura-outline" onclick="window.print()">
+                    <i class="bi bi-printer me-2"></i> Print Official Tax Invoice
+                </button>
+                <a href="{% url 'order_tracking' %}?order_id={{ order.order_id }}" class="btn btn-aura-primary">
+                    <i class="bi bi-compass me-2"></i> Live Consignment Tracker
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

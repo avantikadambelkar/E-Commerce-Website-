@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sign In | AURA Studio India{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="p-4 p-md-5 rounded-4 border border-secondary border-opacity-25 shadow-lg" style="background: var(--aura-surface);">
+                <div class="text-center mb-4">
+                    <span class="logo-dot mb-2"></span>
+                    <h1 class="h3 fw-bold text-white">Sign In to AURA</h1>
+                    <p class="text-muted small">Access your personal vault, saved archive & express tracking</p>
+                </div>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Username</label>
+                        <input type="text" name="username" class="form-control luxury-input" placeholder="Enter username or email" required autofocus>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label small text-muted mb-0">Password</label>
+                            <a href="#" class="small text-warning text-decoration-none" onclick="alert('Demo hint: Admin credentials are admin / admin123')">Forgot password?</a>
+                        </div>
+                        <input type="password" name="password" class="form-control luxury-input" placeholder="••••••••" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-aura-primary w-100 py-3 mb-3">
+                        <span>Sign In Securely</span>
+                        <i class="bi bi-arrow-right ms-2"></i>
+                    </button>
+                </form>
+
+                <div class="p-3 rounded-2 border border-secondary border-opacity-10 small text-center text-muted mb-3" style="background: var(--aura-surface-elevated);">
+                    <strong class="text-warning">Demo Credentials:</strong><br>
+                    Username: <code class="text-white">admin</code> &bull; Password: <code class="text-white">admin123</code>
+                </div>
+
+                <div class="text-center small text-muted">
+                    New to AURA? <a href="{% url 'register' %}" class="text-warning text-decoration-none fw-bold">Create an Account</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

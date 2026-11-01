@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Your Shopping Bag ({{ cart.total_items }}) | AURA Studio{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-muted">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'shop' %}" class="text-muted">Shop</a></li>
+            <li class="breadcrumb-item active text-white" aria-current="page">Shopping Bag</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-secondary border-opacity-25">
+        <div>
+            <h1 class="h2 fw-bold text-white mb-1">Shopping Bag</h1>
+            <p class="text-muted small mb-0">{{ cart.total_items }} item{% if cart.total_items != 1 %}s{% endif %} selected for acquisition</p>
+        </div>
+        <a href="{% url 'shop' %}" class="btn btn-aura-outline btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Continue Browsing
+        </a>
+    </div>
+
+    {% if cart.items.exists %}
+    <div class="row g-4">
+        <!-- Cart Items List (Left Column) -->
+        <div class="col-lg-8">
+            <!-- Free Shipping Progress Banner -->
+            <div class="p-3 mb-4 rounded-3 border border-secondary border-opacity-25" style="background: var(--aura-surface);">
+                {% if cart.subtotal >= 1499 %}
+                <div class="d-flex align-items-center gap-2 text-success small fw-semibold">
+                    <i class="bi bi-check-circle-fill fs-5"></i>
+                    <span>Congratulations! You have unlocked <strong>Complimentary Pan-India Express Delivery</strong>.</span>
+                </div>
+                <div class="progress mt-2" style="height: 6px; background-color: rgba(255,255,255,0.1);">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                {% else %}
+                {% with remaining=1499|add:"-"|add:cart.subtotal %}
+                <div class="d-flex align-items-center gap-2 text-warning small fw-semibold">
+                    <i class="bi bi-truck fs-5"></i>
+                    <span>Add <strong>₹{{ 1499|add:"-"|floatformat:0 }}</strong> more to unlock <strong>Free Express Shipping</strong> across India!</span>
+                </div>
+                <div class="progress mt-2" style="height: 6px; background-color: rgba(255,255,255,0.1);">
+                    <div class="progress-bar bg-warning" role="progressbar" style="width: 60%;" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                {% endwith %}
+                {% endif %}
+            </div>
+
+            <!-- Items Container -->
+            <div class="cart-table-card">
+                {% for item in cart.items.all %}
+                <div class="cart-item-row" id="cart-row-{{ item.id }}">
+                    <a href="{% url 'product_detail' item.product.slug %}">
+                        <img src="{{ item.product.main_image }}" alt="{{ item.product.name }}" class="cart-item-img">
+                    </a>
+
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <small class="text-warning text-uppercase fw-bold" style="letter-spacing: 0.1em; font-size: 0.68rem;">{{ item.product.brand }}</small>
+                                <h3 class="h6 fw-bold text-white mb-1">
+                                    <a href="{% url 'product_detail' item.product.slug %}">{{ item.product.name }}</a>
+                                </h3>
+                                {% if item.variant %}
+                                <div class="small text-muted mb-2">
+                                    <span class="badge bg-secondary bg-opacity-50">{{ item.variant.name }}: {{ item.variant.value }}</span>
+                                </div>
+                                {% endif %}
+                                <div class="text-muted small">Unit Price: ₹{{ item.unit_price|floatformat:0 }}</div>
+                            </div>
+
+                            <!-- Remove Button (CRUD Delete) -->
+                            <a href="{% url 'remove_from_cart' item.id %}" class="text-danger small text-decoration-none p-1" title="Remove Item">
+                                <i class="bi bi-trash3 fs-5"></i>
+                            </a>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-10">
+                            <!-- Quantity Controls (CRUD Update) -->
+                            <div class="quantity-stepper">
+                                <button type="button" class="cart-qty-btn" data-item-id="{{ item.id }}" data-action="decrease">-</button>
+                                <input type="number" class="cart-qty-input" value="{{ item.quantity }}" readonly>
+                                <button type="button" class="cart-qty-btn" data-item-id="{{ item.id }}" data-action="increase">+</button>
+                            </div>
+
+                            <!-- Item Total in INR -->
+                            <div class="text-end">
+                                <span class="fs-5 fw-bold text-white item-total-price">₹{{ item.total_price|floatformat:0 }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Order Summary & Checkout (Right Column) -->
+        <div class="col-lg-4">
+            <!-- Promo Code Card -->
+            <div class="p-4 rounded-3 border border-secondary border-opacity-25 mb-4" style="background: var(--aura-surface);">
+                <h3 class="h6 fw-bold text-white mb-3"><i class="bi bi-ticket-perforated text-warning me-2"></i> Promotional Token</h3>
+                
+                {% if cart.coupon_code %}
+                <div class="d-flex justify-content-between align-items-center p-2 rounded bg-success bg-opacity-10 border border-success border-opacity-25">
+                    <div>
+                        <span class="badge bg-success text-white me-2">{{ cart.coupon_code }}</span>
+                        <small class="text-success fw-semibold">Saved ₹{{ cart.coupon_discount|floatformat:0 }}</small>
+                    </div>
+                    <a href="{% url 'remove_coupon' %}" class="text-danger small text-decoration-none fw-bold"><i class="bi bi-x-circle"></i> Remove</a>
+                </div>
+                {% else %}
+                <form action="{% url 'apply_coupon' %}" method="POST" class="mb-3">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <input type="text" name="code" class="form-control luxury-input form-control-sm text-uppercase" placeholder="ENTER COUPON CODE" required>
+                        <button class="btn btn-aura-primary btn-sm" type="submit">Apply</button>
+                    </div>
+                </form>
+
+                <div class="small text-muted">
+                    <span class="d-block mb-1">Available Studio Codes:</span>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge bg-secondary bg-opacity-50 text-warning cursor-pointer" onclick="document.querySelector('[name=code]').value='AURA10'">AURA10 (10% OFF)</span>
+                        <span class="badge bg-secondary bg-opacity-50 text-warning cursor-pointer" onclick="document.querySelector('[name=code]').value='WELCOME500'">WELCOME500 (₹500 OFF)</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Price Breakdown Summary -->
+            <div class="order-summary-card">
+                <h3 class="h5 fw-bold text-white mb-4">Summary Breakdown</h3>
+
+                <div class="summary-row">
+                    <span>Bag Subtotal</span>
+                    <span id="cart-summary-subtotal" class="fw-semibold text-white">₹{{ cart.subtotal|floatformat:0 }}</span>
+                </div>
+
+                <div class="summary-row">
+                    <span>GST (12% Indian Tax)</span>
+                    <span id="cart-summary-tax" class="fw-semibold text-white">₹{{ cart.tax|floatformat:0 }}</span>
+                </div>
+
+                <div class="summary-row">
+                    <span>Pan-India Express Courier</span>
+                    <span id="cart-summary-shipping" class="fw-semibold {% if cart.shipping_fee == 0 %}text-success{% else %}text-white{% endif %}">
+                        {% if cart.shipping_fee == 0 %}FREE{% else %}₹{{ cart.shipping_fee|floatformat:0 }}{% endif %}
+                    </span>
+                </div>
+
+                {% if cart.coupon_discount > 0 %}
+                <div class="summary-row text-success">
+                    <span>Token Discount ({{ cart.coupon_code }})</span>
+                    <span id="cart-summary-discount">-₹{{ cart.coupon_discount|floatformat:0 }}</span>
+                </div>
+                {% endif %}
+
+                <div class="summary-row total-row">
+                    <span>Grand Acquisition</span>
+                    <span id="cart-summary-grand-total" class="text-warning">₹{{ cart.grand_total|floatformat:0 }}</span>
+                </div>
+
+                <div class="small text-muted mt-2 mb-4">
+                    <i class="bi bi-shield-check text-warning me-1"></i> 256-bit SSL encrypted checkout. Supports UPI, Cards, Netbanking & COD.
+                </div>
+
+                <a href="{% url 'checkout' %}" class="btn btn-aura-primary w-100 py-3 fs-6">
+                    <span>Proceed to Express Checkout</span>
+                    <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Empty Cart Screen -->
+    <div class="text-center py-5 my-5">
+        <div class="mb-4">
+            <i class="bi bi-bag-x display-1 text-muted"></i>
+        </div>
+        <h2 class="h3 fw-bold text-white mb-2">Your Shopping Bag is Empty</h2>
+        <p class="text-muted small max-w-500 mx-auto mb-4">
+            Explore our curated catalog of handloom silks, precision horology, cyber tech and rare fragrances.
+        </p>
+        <a href="{% url 'shop' %}" class="btn btn-aura-primary px-4 py-3">
+            <i class="bi bi-compass me-2"></i> Explore Collections Now
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

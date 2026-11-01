@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Curated Catalog Archive | AURA Studio{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumbs & Header -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-muted">Home</a></li>
+            <li class="breadcrumb-item active text-white" aria-current="page">Catalog Archive</li>
+            {% if selected_category %}
+            <li class="breadcrumb-item active text-warning" aria-current="page">{{ selected_category.name }}</li>
+            {% endif %}
+        </ol>
+    </nav>
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+        <div>
+            <h1 class="h2 fw-bold text-white mb-1">
+                {% if selected_category %}
+                    {{ selected_category.name }}
+                {% elif search_query %}
+                    Search: "{{ search_query }}"
+                {% else %}
+                    The Curated Archive
+                {% endif %}
+            </h1>
+            <p class="text-muted small mb-0">Showing {{ products|length }} of {{ total_count }} handcrafted luxury pieces in Indian Rupees (₹)</p>
+        </div>
+
+        <!-- Sort Dropdown & Mobile Filter Button -->
+        <div class="d-flex align-items-center gap-2 w-100 w-md-auto">
+            <button class="btn btn-aura-outline btn-sm d-lg-none flex-grow-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterDrawer">
+                <i class="bi bi-funnel me-1"></i> Filter & Sort
+            </button>
+
+            <form method="GET" class="d-flex align-items-center gap-2 ms-auto">
+                {% if current_category %}<input type="hidden" name="category" value="{{ current_category }}">{% endif %}
+                {% if search_query %}<input type="hidden" name="q" value="{{ search_query }}">{% endif %}
+                {% if min_price %}<input type="hidden" name="min_price" value="{{ min_price }}">{% endif %}
+                {% if max_price %}<input type="hidden" name="max_price" value="{{ max_price }}">{% endif %}
+
+                <label class="small text-muted text-nowrap d-none d-sm-inline">Sort by:</label>
+                <select name="sort" class="form-select form-select-sm luxury-input" onchange="this.form.submit()" style="min-width: 170px;">
+                    <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest Additions</option>
+                    <option value="price_low" {% if current_sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                    <option value="price_high" {% if current_sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                    <option value="rating" {% if current_sort == 'rating' %}selected{% endif %}>Highest Rated</option>
+                    <option value="popular" {% if current_sort == 'popular' %}selected{% endif %}>Most Popular</option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Desktop Sidebar Filter Column -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="catalog-filter-card">
+                <!-- Search within catalog -->
+                <form method="GET" action="{% url 'shop' %}" class="mb-4">
+                    {% if current_category %}<input type="hidden" name="category" value="{{ current_category }}">{% endif %}
+                    <div class="filter-section-title">
+                        <span>Keyword Search</span>
+                        {% if search_query %}
+                        <a href="{% url 'shop' %}{% if current_category %}?category={{ current_category }}{% endif %}" class="text-warning small text-decoration-none">Clear</a>
+                        {% endif %}
+                    </div>
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control luxury-input form-control-sm" placeholder="Search pieces..." value="{{ search_query }}">
+                        <button class="btn btn-warning btn-sm" type="submit"><i class="bi bi-search"></i></button>
+                    </div>
+                </form>
+
+                <!-- Categories -->
+                <div class="mb-4">
+                    <div class="filter-section-title">
+                        <span>Collections</span>
+                        {% if current_category %}
+                        <a href="{% url 'shop' %}" class="text-warning small text-decoration-none">All</a>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'shop' %}" class="category-filter-item {% if not current_category %}active{% endif %}">
+                        <span>All Collections</span>
+                        <span class="count-badge">{{ total_count }}</span>
+                    </a>
+                    {% for cat in categories %}
+                    <a href="{% url 'shop' %}?category={{ cat.slug }}" class="category-filter-item {% if current_category == cat.slug %}active{% endif %}">
+                        <span>{{ cat.name }}</span>
+                        <span class="count-badge">{{ cat.prod_count }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+
+                <!-- Price Range Filter in INR -->
+                <form method="GET" action="{% url 'shop' %}" class="mb-4">
+                    {% if current_category %}<input type="hidden" name="category" value="{{ current_category }}">{% endif %}
+                    {% if search_query %}<input type="hidden" name="q" value="{{ search_query }}">{% endif %}
+                    <div class="filter-section-title">
+                        <span>Price Range (₹)</span>
+                        {% if min_price or max_price %}
+                        <a href="{% url 'shop' %}{% if current_category %}?category={{ current_category }}{% endif %}" class="text-warning small text-decoration-none">Reset</a>
+                        {% endif %}
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="small text-muted">Min (₹)</label>
+                            <input type="number" name="min_price" class="form-control luxury-input form-control-sm" placeholder="1000" value="{{ min_price }}">
+                        </div>
+                        <div class="col-6">
+                            <label class="small text-muted">Max (₹)</label>
+                            <input type="number" name="max_price" class="form-control luxury-input form-control-sm" placeholder="25000" value="{{ max_price }}">
+                        </div>
+                    </div>
+                    <button class="btn btn-aura-primary btn-sm w-100" type="submit">Apply Price Filter</button>
+                </form>
+
+                <!-- Stock Switch -->
+                <form method="GET" action="{% url 'shop' %}">
+                    {% if current_category %}<input type="hidden" name="category" value="{{ current_category }}">{% endif %}
+                    <div class="form-check form-switch pt-2 border-top border-secondary border-opacity-25">
+                        <input class="form-check-input" type="checkbox" role="switch" id="stockSwitch" name="in_stock" value="1" {% if request.GET.in_stock == '1' %}checked{% endif %} onchange="this.form.submit()">
+                        <label class="form-check-label small text-muted" for="stockSwitch">Show In-Stock Only</label>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Product Grid Column -->
+        <div class="col-lg-9">
+            {% if products %}
+            <div class="row g-4">
+                {% for product in products %}
+                <div class="col-xl-4 col-md-6 col-sm-6">
+                    <div class="product-card">
+                        <div class="product-thumb-container">
+                            {% if product.badge %}
+                            <span class="product-badge-pill">{{ product.badge }}</span>
+                            {% endif %}
+
+                            <!-- Wishlist Toggle Button (AJAX) -->
+                            <button class="wishlist-btn-corner wishlist-toggle-btn {% if product.id in wishlist_product_ids %}active{% endif %}" data-product-id="{{ product.id }}" title="Save to Wishlist">
+                                <i class="bi {% if product.id in wishlist_product_ids %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+                            </button>
+
+                            <a href="{% url 'product_detail' product.slug %}">
+                                <img src="{{ product.main_image }}" alt="{{ product.name }}" class="product-thumb" loading="lazy">
+                            </a>
+                        </div>
+
+                        <div class="product-card-body">
+                            <div class="product-card-brand">{{ product.brand }}</div>
+                            <h3 class="product-card-title">
+                                <a href="{% url 'product_detail' product.slug %}">{{ product.name }}</a>
+                            </h3>
+
+                            <div class="product-rating-row">
+                                <i class="bi bi-star-fill"></i>
+                                <span class="fw-bold">{{ product.rating }}</span>
+                                <span class="rating-count">({{ product.rating_count }})</span>
+                            </div>
+
+                            <div class="product-price-row">
+                                <span class="current-price">₹{{ product.price|floatformat:0 }}</span>
+                                {% if product.original_price %}
+                                <span class="original-price">₹{{ product.original_price|floatformat:0 }}</span>
+                                <span class="discount-pill">{{ product.discount_percentage }}% OFF</span>
+                                {% endif %}
+                            </div>
+
+                            <button class="btn btn-card-add ajax-add-to-cart-btn" data-product-id="{{ product.id }}">
+                                <i class="bi bi-bag-plus"></i>
+                                <span>Add to Bag</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <nav aria-label="Page navigation" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link luxury-input text-white" href="?page={{ page_obj.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                        <a class="page-link luxury-input {% if page_obj.number == num %}bg-warning text-dark fw-bold border-warning{% else %}text-white{% endif %}" href="?page={{ num }}{% if current_category %}&category={{ current_category }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">
+                            {{ num }}
+                        </a>
+                    </li>
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link luxury-input text-white" href="?page={{ page_obj.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <!-- Empty state -->
+            <div class="text-center py-5 my-5">
+                <i class="bi bi-search display-3 text-muted mb-3 d-block"></i>
+                <h3 class="h4 text-white">No pieces match your search criteria</h3>
+                <p class="text-muted small">Try adjusting your filters, price range, or explore another collection.</p>
+                <a href="{% url 'shop' %}" class="btn btn-aura-primary mt-2">Reset All Filters</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Filter Drawer Offcanvas -->
+<div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="filterDrawer" aria-labelledby="filterDrawerLabel" style="background: #14161b !important;">
+    <div class="offcanvas-header border-bottom border-secondary border-opacity-25">
+        <h5 class="offcanvas-title text-white" id="filterDrawerLabel">Filters & Collections</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="mb-4">
+            <h6 class="text-warning text-uppercase small fw-bold">Collections</h6>
+            <div class="list-group list-group-flush">
+                <a href="{% url 'shop' %}" class="list-group-item list-group-item-action bg-transparent text-white border-secondary opacity-75">All Collections</a>
+                {% for cat in categories %}
+                <a href="{% url 'shop' %}?category={{ cat.slug }}" class="list-group-item list-group-item-action bg-transparent text-white border-secondary opacity-75 d-flex justify-content-between">
+                    <span>{{ cat.name }}</span>
+                    <span class="badge bg-secondary">{{ cat.prod_count }}</span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

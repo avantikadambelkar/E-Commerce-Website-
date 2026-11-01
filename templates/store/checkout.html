@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Express Checkout | AURA Studio India{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-muted">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'cart' %}" class="text-muted">Bag</a></li>
+            <li class="breadcrumb-item active text-white" aria-current="page">Express Checkout</li>
+        </ol>
+    </nav>
+
+    <div class="mb-4 pb-2 border-bottom border-secondary border-opacity-25">
+        <h1 class="h2 fw-bold text-white mb-1">Express Checkout</h1>
+        <p class="text-muted small mb-0">Secure pan-India logistics powered by BlueDart & Delhivery Express</p>
+    </div>
+
+    <form action="{% url 'place_order' %}" method="POST">
+        {% csrf_token %}
+
+        <div class="row g-5">
+            <!-- Left Column: Shipping Address & Payment Selection -->
+            <div class="col-lg-7">
+                <!-- Section 1: Customer Contact & Indian Shipping Address -->
+                <div class="p-4 rounded-3 border border-secondary border-opacity-25 mb-4" style="background: var(--aura-surface);">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span class="badge bg-warning text-dark rounded-circle px-2 py-1">1</span>
+                        <h2 class="h5 fw-bold text-white mb-0">Shipping Destination (India)</h2>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small text-muted">Full Legal Name</label>
+                            {{ form.full_name }}
+                            {% if form.full_name.errors %}<div class="text-danger small">{{ form.full_name.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Email Address (for Digital Invoice)</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Mobile Number (for SMS & OTP)</label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}<div class="text-danger small">{{ form.phone.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small text-muted">Flat / House No. / Building / Street</label>
+                            {{ form.address_line1 }}
+                            {% if form.address_line1.errors %}<div class="text-danger small">{{ form.address_line1.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small text-muted">Landmark / Locality (Optional)</label>
+                            {{ form.address_line2 }}
+                        </div>
+
+                        <div class="col-md-5">
+                            <label class="form-label small text-muted">City / District</label>
+                            {{ form.city }}
+                            {% if form.city.errors %}<div class="text-danger small">{{ form.city.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted">State / UT</label>
+                            {{ form.state }}
+                            {% if form.state.errors %}<div class="text-danger small">{{ form.state.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted">PIN Code</label>
+                            {{ form.pincode }}
+                            {% if form.pincode.errors %}<div class="text-danger small">{{ form.pincode.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Payment Instrument -->
+                <div class="p-4 rounded-3 border border-secondary border-opacity-25" style="background: var(--aura-surface);">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span class="badge bg-warning text-dark rounded-circle px-2 py-1">2</span>
+                        <h2 class="h5 fw-bold text-white mb-0">Select Payment Method</h2>
+                    </div>
+
+                    <!-- Payment Choices Radio Cards -->
+                    <div class="payment-options-group mb-4">
+                        <!-- UPI -->
+                        <div>
+                            <input type="radio" class="btn-check" name="payment_method" id="pay_upi" value="upi" checked>
+                            <label class="payment-method-card" for="pay_upi">
+                                <i class="bi bi-qr-code-scan fs-4 text-warning"></i>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-white">Instant UPI / Dynamic QR Code</div>
+                                    <small class="text-muted">Google Pay, PhonePe, Paytm, CRED & Any BHIM App (0% Surcharge)</small>
+                                </div>
+                                <span class="badge bg-success bg-opacity-25 text-success small">FASTEST</span>
+                            </label>
+                        </div>
+
+                        <!-- Card -->
+                        <div>
+                            <input type="radio" class="btn-check" name="payment_method" id="pay_card" value="card">
+                            <label class="payment-method-card" for="pay_card">
+                                <i class="bi bi-credit-card-2-front fs-4 text-warning"></i>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-white">Credit / Debit Card</div>
+                                    <small class="text-muted">Visa, MasterCard, RuPay, American Express (Indian & Global)</small>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Net Banking -->
+                        <div>
+                            <input type="radio" class="btn-check" name="payment_method" id="pay_netbanking" value="netbanking">
+                            <label class="payment-method-card" for="pay_netbanking">
+                                <i class="bi bi-bank fs-4 text-warning"></i>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-white">Net Banking</div>
+                                    <small class="text-muted">HDFC, ICICI, SBI, Axis, Kotak, and 50+ Indian Banks</small>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Cash on Delivery -->
+                        <div>
+                            <input type="radio" class="btn-check" name="payment_method" id="pay_cod" value="cod">
+                            <label class="payment-method-card" for="pay_cod">
+                                <i class="bi bi-cash-stack fs-4 text-warning"></i>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-white">Cash on Delivery (COD)</div>
+                                    <small class="text-muted">Pay at doorstep upon package inspection (+₹50 express handling)</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Details Previews -->
+                    <div id="upi-payment-details" class="p-3 rounded-2 border border-secondary border-opacity-25 mb-3" style="background: var(--aura-surface-elevated);">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="p-2 bg-white rounded text-dark text-center" style="width: 70px; height: 70px;">
+                                <i class="bi bi-qr-code fs-1"></i>
+                            </div>
+                            <div class="small">
+                                <div class="text-white fw-bold">Scan with any UPI App</div>
+                                <div class="text-muted">UPI ID: <strong>aura.studio@okaxis</strong></div>
+                                <div class="text-success mt-1"><i class="bi bi-check2-circle"></i> Instant 1-tap verification enabled</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="card-payment-details" class="p-3 rounded-2 border border-secondary border-opacity-25 mb-3" style="display: none; background: var(--aura-surface-elevated);">
+                        <div class="small text-muted mb-2">Card details simulated in sandbox mode (SSL 256-Bit):</div>
+                        <div class="row g-2">
+                            <div class="col-12">
+                                <input type="text" class="form-control luxury-input form-control-sm" placeholder="Card Number (4532 •••• •••• ••••)">
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control luxury-input form-control-sm" placeholder="MM / YY">
+                            </div>
+                            <div class="col-6">
+                                <input type="password" class="form-control luxury-input form-control-sm" placeholder="CVV (3 Digits)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="cod-payment-details" class="p-3 rounded-2 border border-secondary border-opacity-25 mb-3" style="display: none; background: var(--aura-surface-elevated);">
+                        <div class="small text-muted">
+                            <i class="bi bi-info-circle text-warning me-1"></i>
+                            Please keep exact change ready in Indian Rupees (₹) for courier executive upon delivery.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Order Review & Placement -->
+            <div class="col-lg-5">
+                <div class="order-summary-card">
+                    <h2 class="h5 fw-bold text-white mb-3">Order Bag Items ({{ cart.total_items }})</h2>
+
+                    <!-- Mini Cart Items Preview -->
+                    <div class="mb-4" style="max-height: 260px; overflow-y: auto;">
+                        {% for item in cart.items.all %}
+                        <div class="d-flex align-items-center gap-3 py-2 border-bottom border-secondary border-opacity-10">
+                            <img src="{{ item.product.main_image }}" alt="{{ item.product.name }}" style="width: 50px; height: 55px; object-fit: cover; border-radius: 6px;">
+                            <div class="flex-grow-1 small">
+                                <div class="text-white fw-semibold text-truncate" style="max-width: 190px;">{{ item.product.name }}</div>
+                                <div class="text-muted">{{ item.quantity }}x &bull; {% if item.variant %}{{ item.variant.value }}{% else %}Standard{% endif %}</div>
+                            </div>
+                            <div class="text-end fw-bold text-white small">
+                                ₹{{ item.total_price|floatformat:0 }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Breakdown -->
+                    <div class="summary-row">
+                        <span>Items Subtotal</span>
+                        <span class="text-white fw-semibold">₹{{ cart.subtotal|floatformat:0 }}</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>GST (12% Included)</span>
+                        <span class="text-white fw-semibold">₹{{ cart.tax|floatformat:0 }}</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Pan-India Courier</span>
+                        <span class="fw-semibold {% if cart.shipping_fee == 0 %}text-success{% else %}text-white{% endif %}">
+                            {% if cart.shipping_fee == 0 %}FREE{% else %}₹{{ cart.shipping_fee|floatformat:0 }}{% endif %}
+                        </span>
+                    </div>
+
+                    {% if cart.coupon_discount > 0 %}
+                    <div class="summary-row text-success">
+                        <span>Promo Code ({{ cart.coupon_code }})</span>
+                        <span>-₹{{ cart.coupon_discount|floatformat:0 }}</span>
+                    </div>
+                    {% endif %}
+
+                    <div class="summary-row total-row">
+                        <span>Total Payable</span>
+                        <span class="text-warning">₹{{ cart.grand_total|floatformat:0 }}</span>
+                    </div>
+
+                    <!-- Action Button -->
+                    <button type="submit" class="btn btn-aura-primary w-100 py-3 mt-4 fs-6">
+                        <i class="bi bi-lock-fill me-2"></i>
+                        <span>Confirm Order &bull; ₹{{ cart.grand_total|floatformat:0 }}</span>
+                    </button>
+
+                    <div class="text-center text-muted small mt-3">
+                        <i class="bi bi-shield-lock me-1"></i> 100% Secure Checkout with End-to-End Encryption
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

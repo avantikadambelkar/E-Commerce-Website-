@@ -1,0 +1,286 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AURA | Contemporary Luxury Lifestyle & Design{% endblock %}</title>
+    <meta name="description" content="Discover curated contemporary luxury fashion, precision acoustics, artisanal fragrance, and sculptural home goods in India.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Custom Aesthetic Stylesheet -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Top Announcement Strip (Indian Express Delivery & Festive Codes) -->
+    <div class="top-announcement-bar text-center">
+        <div class="container d-flex justify-content-between align-items-center">
+            <span class="d-none d-md-inline text-muted small"><i class="bi bi-geo-alt-fill me-1 text-warning"></i> Ships across all 28 Indian States & UTs</span>
+            <div>
+                <span class="badge-glow me-2">FESTIVE LUXE</span>
+                <span>Complimentary Express Delivery on orders above ₹1,499 &bull; Use code <strong>AURA10</strong></span>
+            </div>
+            <div class="d-none d-md-flex align-items-center gap-3">
+                <a href="{% url 'order_tracking' %}" class="text-decoration-none small text-light opacity-75 hover-gold">
+                    <i class="bi bi-truck me-1"></i> Track Order
+                </a>
+                <span class="text-white-50">|</span>
+                <span class="small fw-semibold text-warning"><i class="bi bi-currency-rupee"></i> INR (₹)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Aesthetic Glass Navbar -->
+    <nav class="navbar navbar-expand-lg aura-navbar">
+        <div class="container">
+            <!-- Brand Logo -->
+            <a class="navbar-brand me-4" href="{% url 'home' %}">
+                <span class="logo-dot"></span>
+                <span>AURA</span>
+                <span class="brand-sub">Curated Studio</span>
+            </a>
+
+            <!-- Mobile Action Buttons (Right corner on mobile) -->
+            <div class="d-flex d-lg-none align-items-center gap-2">
+                <a href="{% url 'wishlist' %}" class="header-action-btn position-relative" aria-label="Wishlist">
+                    <i class="bi bi-heart"></i>
+                    <span class="header-badge wishlist-counter-badge" style="display: {% if wishlist_count > 0 %}flex{% else %}none{% endif %};">
+                        {{ wishlist_count }}
+                    </span>
+                </a>
+                <a href="{% url 'cart' %}" class="header-action-btn position-relative" aria-label="Bag">
+                    <i class="bi bi-bag"></i>
+                    <span class="header-badge cart-counter-badge" style="display: {% if cart_count > 0 %}flex{% else %}none{% endif %};">
+                        {{ cart_count }}
+                    </span>
+                </a>
+            </div>
+
+            <!-- Navbar Desktop Navigation Links -->
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'shop' and not request.GET.category %}active{% endif %}" href="{% url 'shop' %}">Explore All</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="categoryDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Collections
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark border-secondary shadow-lg" aria-labelledby="categoryDropdown" style="background: #14161b; border-radius: 12px;">
+                            {% for cat in nav_categories %}
+                            <li>
+                                <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'shop' %}?category={{ cat.slug }}">
+                                    <i class="bi {{ cat.icon }} text-warning"></i>
+                                    <span>{{ cat.name }}</span>
+                                </a>
+                            </li>
+                            {% endfor %}
+                            <li><hr class="dropdown-divider border-secondary opacity-50"></li>
+                            <li><a class="dropdown-item text-warning fw-semibold" href="{% url 'shop' %}"><i class="bi bi-grid me-2"></i> View Full Archive</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-warning fw-semibold" href="{% url 'manage_products' %}">
+                            <i class="bi bi-sliders2 me-1"></i> Catalog CRUD
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Live Search Bar -->
+                <form action="{% url 'shop' %}" method="GET" class="aura-search-container me-3 d-none d-xl-block">
+                    <i class="bi bi-search aura-search-icon"></i>
+                    <input type="text" name="q" class="aura-search-input" placeholder="Search luxury, tech, fragrance..." value="{{ request.GET.q }}">
+                </form>
+
+                <!-- Header Actions (Wishlist, Bag, User) -->
+                <div class="d-none d-lg-flex align-items-center gap-3">
+                    <!-- Wishlist -->
+                    <a href="{% url 'wishlist' %}" class="header-action-btn position-relative" title="Saved Pieces">
+                        <i class="bi bi-heart"></i>
+                        <span class="header-badge wishlist-counter-badge" style="display: {% if wishlist_count > 0 %}flex{% else %}none{% endif %};">
+                            {{ wishlist_count }}
+                        </span>
+                    </a>
+
+                    <!-- Cart Bag -->
+                    <a href="{% url 'cart' %}" class="header-action-btn position-relative" title="Shopping Bag">
+                        <i class="bi bi-bag"></i>
+                        <span class="header-badge cart-counter-badge" style="display: {% if cart_count > 0 %}flex{% else %}none{% endif %};">
+                            {{ cart_count }}
+                        </span>
+                    </a>
+
+                    <!-- Account / Auth -->
+                    <div class="dropdown">
+                        <button class="header-action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Account">
+                            <i class="bi bi-person"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark border-secondary shadow-lg" style="background: #14161b; border-radius: 12px; min-width: 220px;">
+                            {% if user.is_authenticated %}
+                            <li class="px-3 py-2 border-bottom border-secondary opacity-75">
+                                <small class="text-muted d-block">Signed in as</small>
+                                <span class="fw-bold text-white">{{ user.first_name|default:user.username }}</span>
+                            </li>
+                            <li><a class="dropdown-item py-2" href="{% url 'profile' %}"><i class="bi bi-person-lines-fill me-2 text-warning"></i> My Profile</a></li>
+                            <li><a class="dropdown-item py-2" href="{% url 'my_orders' %}"><i class="bi bi-box-seam me-2 text-warning"></i> My Orders</a></li>
+                            <li><a class="dropdown-item py-2" href="{% url 'manage_products' %}"><i class="bi bi-gear me-2 text-warning"></i> Storefront CRUD</a></li>
+                            <li><hr class="dropdown-divider border-secondary opacity-50"></li>
+                            <li><a class="dropdown-item py-2 text-danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i> Sign Out</a></li>
+                            {% else %}
+                            <li><a class="dropdown-item py-2" href="{% url 'login' %}"><i class="bi bi-box-arrow-in-right me-2 text-warning"></i> Sign In</a></li>
+                            <li><a class="dropdown-item py-2" href="{% url 'register' %}"><i class="bi bi-person-plus me-2 text-warning"></i> Create Account</a></li>
+                            <li><hr class="dropdown-divider border-secondary opacity-50"></li>
+                            <li><a class="dropdown-item py-2" href="{% url 'order_tracking' %}"><i class="bi bi-truck me-2"></i> Track An Order</a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Global Messages / Flash Alerts -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'warning' %}warning{% else %}success{% endif %} alert-dismissible fade show border-0 shadow-sm" role="alert" style="background: #1c1f26; color: #fff; border-left: 4px solid var(--aura-gold) !important;">
+            <i class="bi {% if message.tags == 'error' %}bi-exclamation-octagon-fill text-danger{% else %}bi-check-circle-fill text-success{% endif %} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Page Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Aesthetic Editorial Footer -->
+    <footer class="aura-footer mt-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="navbar-brand mb-3">
+                        <span class="logo-dot"></span>
+                        <span>AURA</span>
+                        <span class="brand-sub">Curated Studio</span>
+                    </div>
+                    <p class="small text-muted pe-lg-4">
+                        A modern Indian collective redefining luxury through brutalist minimalism, tactile materials, and ethical artisanal craftsmanship. Tailored for discerning tastes from Mumbai to Tokyo.
+                    </p>
+                    <div class="d-flex gap-3 mt-3">
+                        <a href="#" class="header-action-btn" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="header-action-btn" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" class="header-action-btn" aria-label="Pinterest"><i class="bi bi-pinterest"></i></a>
+                        <a href="#" class="header-action-btn" aria-label="Spotify"><i class="bi bi-spotify"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-3 col-6">
+                    <div class="footer-heading">Collections</div>
+                    <ul class="footer-link-list">
+                        {% for c in nav_categories|slice:":5" %}
+                        <li><a href="{% url 'shop' %}?category={{ c.slug }}">{{ c.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="col-lg-2 col-md-3 col-6">
+                    <div class="footer-heading">Services</div>
+                    <ul class="footer-link-list">
+                        <li><a href="{% url 'order_tracking' %}">Track Order</a></li>
+                        <li><a href="{% url 'cart' %}">Shopping Bag</a></li>
+                        <li><a href="{% url 'wishlist' %}">Saved Pieces</a></li>
+                        <li><a href="{% url 'manage_products' %}">Store Manager (CRUD)</a></li>
+                        <li><a href="{% url 'profile' %}">Account Portal</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-4 col-md-12">
+                    <div class="footer-heading">The Inner Circle</div>
+                    <p class="small text-muted">Subscribe to receive private invitations to limited batch drops and archival exhibitions.</p>
+                    <div class="input-group mb-3">
+                        <input type="email" class="form-control luxury-input" placeholder="Enter your email address" style="border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important;">
+                        <button class="btn btn-aura-primary" type="button" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" onclick="alert('Welcome to AURA Inner Circle. Check your inbox for your 10% welcome token.')">Join</button>
+                    </div>
+                    <div class="d-flex align-items-center gap-3 text-muted small">
+                        <span><i class="bi bi-shield-check text-warning me-1"></i> 100% Genuine</span>
+                        <span><i class="bi bi-arrow-repeat text-warning me-1"></i> 7-Day Easy Returns</span>
+                        <span><i class="bi bi-truck text-warning me-1"></i> Express Courier</span>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-secondary opacity-25 my-5">
+
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center small text-muted">
+                <p class="mb-2 mb-md-0">&copy; 2026 AURA STUDIO INDIA PVT. LTD. All rights reserved. Handcrafted with precision in Python & Django.</p>
+                <div class="d-flex gap-3">
+                    <span>UPI Verified</span>
+                    <span>&bull;</span>
+                    <span>RuPay & Visa</span>
+                    <span>&bull;</span>
+                    <span>RazorPay Ready</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Shopping App Mobile Bottom Navigation Bar -->
+    <div class="mobile-app-bottom-bar">
+        <a href="{% url 'home' %}" class="app-tab-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+            <i class="bi bi-house-door"></i>
+            <span>Home</span>
+        </a>
+        <a href="{% url 'shop' %}" class="app-tab-item {% if request.resolver_match.url_name == 'shop' %}active{% endif %}">
+            <i class="bi bi-compass"></i>
+            <span>Explore</span>
+        </a>
+        <a href="{% url 'wishlist' %}" class="app-tab-item {% if request.resolver_match.url_name == 'wishlist' %}active{% endif %} position-relative">
+            <i class="bi bi-heart"></i>
+            <span class="app-tab-badge wishlist-counter-badge" style="display: {% if wishlist_count > 0 %}flex{% else %}none{% endif %};">
+                {{ wishlist_count }}
+            </span>
+            <span>Saved</span>
+        </a>
+        <a href="{% url 'cart' %}" class="app-tab-item {% if request.resolver_match.url_name == 'cart' %}active{% endif %} position-relative">
+            <i class="bi bi-bag"></i>
+            <span class="app-tab-badge cart-counter-badge" style="display: {% if cart_count > 0 %}flex{% else %}none{% endif %};">
+                {{ cart_count }}
+            </span>
+            <span>Bag</span>
+        </a>
+        <a href="{% if user.is_authenticated %}{% url 'profile' %}{% else %}{% url 'login' %}{% endif %}" class="app-tab-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+            <i class="bi bi-person"></i>
+            <span>Account</span>
+        </a>
+    </div>
+
+    <!-- Dynamic Toast Container for AJAX Actions -->
+    <div class="aura-toast-container"></div>
+
+    <!-- Bootstrap 5.3 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom App JS -->
+    <script src="{% static 'js/main.js' %}"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

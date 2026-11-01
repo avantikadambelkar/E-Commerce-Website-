@@ -1,0 +1,327 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}AURA | Modern Luxury Lifestyle & Design Studio{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Category Story Bubbles (App-style Quick Browsing) -->
+    <div class="mt-4 mb-2">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="text-uppercase small fw-bold text-muted" style="letter-spacing: 0.15em;">Explore Categories</span>
+            <a href="{% url 'shop' %}" class="small text-warning text-decoration-none fw-semibold">View All <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="story-bubbles-wrapper">
+            {% for cat in featured_categories %}
+            <a href="{% url 'shop' %}?category={{ cat.slug }}" class="category-bubble-card">
+                <div class="category-bubble-ring">
+                    <img src="{{ cat.image_url }}" alt="{{ cat.name }}" class="category-bubble-img">
+                </div>
+                <div class="category-bubble-title">{{ cat.name }}</div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Hero Editorial Banner -->
+    <div class="hero-editorial-section pt-2">
+        <div class="hero-banner-card">
+            <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=1600&auto=format&fit=crop" alt="AURA Autumn Luxury Drop" class="hero-bg-media">
+            <div class="hero-overlay-gradient"></div>
+            <div class="hero-content">
+                <div class="hero-eyebrow">
+                    <i class="bi bi-stars"></i> Curated Autumn / Festive Drop 2026
+                </div>
+                <h1 class="hero-title">
+                    Brutalist Luxury. <br>Crafted in India.
+                </h1>
+                <p class="hero-description">
+                    Sculpted silhouettes, artisanal handloom silks, precision horology, and uncompromised acoustics designed for modern connoisseurs.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{% url 'shop' %}" class="btn btn-aura-primary">
+                        <span>Explore Curated Archive</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                    <a href="{% url 'shop' %}?category=haute-horlogerie" class="btn btn-aura-outline">
+                        <i class="bi bi-watch"></i>
+                        <span>Timepieces</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Perks / Trust Strip -->
+<div class="perks-strip-section my-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-3 col-6">
+                <div class="perk-item">
+                    <div class="perk-icon-box">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <div>
+                        <div class="perk-title">100% Authentic</div>
+                        <p class="perk-desc">Direct from atelier studios</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="perk-item">
+                    <div class="perk-icon-box">
+                        <i class="bi bi-truck"></i>
+                    </div>
+                    <div>
+                        <div class="perk-title">Express India Dispatch</div>
+                        <p class="perk-desc">Free above ₹1,499</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="perk-item">
+                    <div class="perk-icon-box">
+                        <i class="bi bi-qr-code-scan"></i>
+                    </div>
+                    <div>
+                        <div class="perk-title">Instant UPI & Cards</div>
+                        <p class="perk-desc">GPay, PhonePe, EMI & COD</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="perk-item">
+                    <div class="perk-icon-box">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </div>
+                    <div>
+                        <div class="perk-title">7-Day Return Guarantee</div>
+                        <p class="perk-desc">Doorstep reverse pickup</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Trending Drops Section -->
+    <section class="py-4">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <span class="text-uppercase small fw-bold text-warning" style="letter-spacing: 0.15em;">High Demand Drops</span>
+                <h2 class="h2 fw-bold text-white mb-0">Trending Across India</h2>
+            </div>
+            <a href="{% url 'shop' %}" class="btn btn-aura-outline btn-sm">
+                <span>View Full Catalog</span>
+                <i class="bi bi-arrow-up-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row g-4">
+            {% for product in trending_products %}
+            <div class="col-xl-3 col-lg-4 col-sm-6">
+                <div class="product-card">
+                    <div class="product-thumb-container">
+                        {% if product.badge %}
+                        <span class="product-badge-pill">{{ product.badge }}</span>
+                        {% endif %}
+
+                        <!-- Wishlist Toggle Button (AJAX) -->
+                        <button class="wishlist-btn-corner wishlist-toggle-btn {% if product.id in wishlist_product_ids %}active{% endif %}" data-product-id="{{ product.id }}" title="Save to Wishlist">
+                            <i class="bi {% if product.id in wishlist_product_ids %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+                        </button>
+
+                        <a href="{% url 'product_detail' product.slug %}">
+                            <img src="{{ product.main_image }}" alt="{{ product.name }}" class="product-thumb" loading="lazy">
+                        </a>
+                    </div>
+
+                    <div class="product-card-body">
+                        <div class="product-card-brand">{{ product.brand }}</div>
+                        <h3 class="product-card-title">
+                            <a href="{% url 'product_detail' product.slug %}">{{ product.name }}</a>
+                        </h3>
+
+                        <div class="product-rating-row">
+                            <i class="bi bi-star-fill"></i>
+                            <span class="fw-bold">{{ product.rating }}</span>
+                            <span class="rating-count">({{ product.rating_count }})</span>
+                        </div>
+
+                        <div class="product-price-row">
+                            <span class="current-price">₹{{ product.price|floatformat:0 }}</span>
+                            {% if product.original_price %}
+                            <span class="original-price">₹{{ product.original_price|floatformat:0 }}</span>
+                            <span class="discount-pill">{{ product.discount_percentage }}% OFF</span>
+                            {% endif %}
+                        </div>
+
+                        <button class="btn btn-card-add ajax-add-to-cart-btn" data-product-id="{{ product.id }}">
+                            <i class="bi bi-bag-plus"></i>
+                            <span>Add to Bag</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Editorial Spotlight Feature (Split Card) -->
+    <section class="my-5">
+        <div class="card border-0 overflow-hidden shadow-lg" style="background: linear-gradient(135deg, #171a22 0%, #0e1014 100%); border-radius: var(--aura-radius-lg); border: 1px solid var(--aura-border);">
+            <div class="row g-0 align-items-center">
+                <div class="col-lg-6 order-lg-2">
+                    <img src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=1200&auto=format&fit=crop" alt="Precision Horology" class="w-100" style="min-height: 400px; max-height: 480px; object-fit: cover;">
+                </div>
+                <div class="col-lg-6 p-4 p-md-5">
+                    <span class="badge-glow mb-3 d-inline-block">HAUTE HORLOGERIE</span>
+                    <h2 class="display-6 fw-bold text-white mb-3">Mechanical Precision. <br>Minimalist Geometry.</h2>
+                    <p class="text-muted mb-4">
+                        Discover the Chronos Series: surgical grade 316L stainless steel, custom high-beat mechanical movements, and scratch-proof sapphire crystal designed to withstand everyday rigors while exuding silent luxury.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="{% url 'shop' %}?category=haute-horlogerie" class="btn btn-aura-primary">
+                            <span>Explore Watches</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                        <a href="{% url 'shop' %}?category=acoustics-cyber-tech" class="btn btn-aura-outline">
+                            <span>Acoustics</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- New Arrivals Section -->
+    <section class="py-4">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <span class="text-uppercase small fw-bold text-warning" style="letter-spacing: 0.15em;">Just Unveiled</span>
+                <h2 class="h2 fw-bold text-white mb-0">New Studio Arrivals</h2>
+            </div>
+            <a href="{% url 'shop' %}" class="small text-warning text-decoration-none fw-semibold">View Catalog <i class="bi bi-arrow-right"></i></a>
+        </div>
+
+        <div class="row g-4">
+            {% for product in new_arrivals %}
+            <div class="col-xl-3 col-lg-4 col-sm-6">
+                <div class="product-card">
+                    <div class="product-thumb-container">
+                        {% if product.badge %}
+                        <span class="product-badge-pill">{{ product.badge }}</span>
+                        {% endif %}
+
+                        <button class="wishlist-btn-corner wishlist-toggle-btn {% if product.id in wishlist_product_ids %}active{% endif %}" data-product-id="{{ product.id }}" title="Save to Wishlist">
+                            <i class="bi {% if product.id in wishlist_product_ids %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+                        </button>
+
+                        <a href="{% url 'product_detail' product.slug %}">
+                            <img src="{{ product.main_image }}" alt="{{ product.name }}" class="product-thumb" loading="lazy">
+                        </a>
+                    </div>
+
+                    <div class="product-card-body">
+                        <div class="product-card-brand">{{ product.brand }}</div>
+                        <h3 class="product-card-title">
+                            <a href="{% url 'product_detail' product.slug %}">{{ product.name }}</a>
+                        </h3>
+
+                        <div class="product-rating-row">
+                            <i class="bi bi-star-fill"></i>
+                            <span class="fw-bold">{{ product.rating }}</span>
+                            <span class="rating-count">({{ product.rating_count }})</span>
+                        </div>
+
+                        <div class="product-price-row">
+                            <span class="current-price">₹{{ product.price|floatformat:0 }}</span>
+                            {% if product.original_price %}
+                            <span class="original-price">₹{{ product.original_price|floatformat:0 }}</span>
+                            <span class="discount-pill">{{ product.discount_percentage }}% OFF</span>
+                            {% endif %}
+                        </div>
+
+                        <button class="btn btn-card-add ajax-add-to-cart-btn" data-product-id="{{ product.id }}">
+                            <i class="bi bi-bag-plus"></i>
+                            <span>Add to Bag</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Client Testimonials & Social Proof -->
+    <section class="py-5 my-4 border-top border-secondary border-opacity-25">
+        <div class="text-center mb-5">
+            <span class="text-uppercase small fw-bold text-warning" style="letter-spacing: 0.15em;">Verified Collector Voices</span>
+            <h2 class="h2 fw-bold text-white">Loved Across Metros & Beyond</h2>
+            <p class="text-muted small">Discerning patrons share their experience with AURA creations.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 p-4 border-0" style="background: var(--aura-surface); border: 1px solid var(--aura-border) !important; border-radius: var(--aura-radius-md);">
+                    <div class="d-flex text-warning mb-3">
+                        <i class="bi bi-star-fill me-1"></i><i class="bi bi-star-fill me-1"></i><i class="bi bi-star-fill me-1"></i><i class="bi bi-star-fill me-1"></i><i class="bi bi-star-fill"></i>
+                    </div>
+                    <p class="text-light small mb-3">"The raw silk kimono trench has become my signature evening wear. The weight of the handloom weave is extraordinary. Arrived in Mumbai within 48 hours."</p>
+                    <div class="mt-auto pt-3 border-top border-secondary border-opacity-25 d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="fw-bold text-white small">Kabir Mehra</div>
+                            <small class="text-muted">South Mumbai</small>
+                        </div>
+                        <span class="badge bg-success bg-opacity-25 text-success small"><i class="bi bi-patch-check-fill me-1"></i> Verified</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 p-4 border-0" style="background: var(--aura-surface); border: 1px solid var(--aura-border) !important; border-radius: var(--aura-radius-md);">
+                    <div class="d-flex text-warning mb-3">
+                        <i class="bi bi-star-fill me-1"></i><i class="bi bi-star-fill me-1"></i><i class="bi bi-star-fill me-1"></i><i class="bi bi-star-fill me-1"></i><i class="bi bi-star-fill"></i>
+                    </div>
+                    <p class="text-light small mb-3">"The Spatial Headphones outshine any flagship audio gear I have used. Clean separation, genuine lambskin cups, and zero fatigue even during long coding sessions."</p>
+                    <div class="mt-auto pt-3 border-top border-secondary border-opacity-25 d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="fw-bold text-white small">Arjun Nair</div>
+                            <small class="text-muted">Bengaluru Tech Corridor</small>
+                        </div>
+                        <span class="badge bg-success bg-opacity-25 text-success small"><i class="bi bi-patch-check-fill me-1"></i> Verified</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 p-4 border-0" style="background: var(--aura-surface); border: 1px solid var(--aura-border) !important; border-radius: var(--aura-radius-md);">
+                    <div class="d-flex text-warning mb-3">
+                        <i class="bi bi-star-fill me-1"></i><i class="bi bi-star-fill me-1"></i><i class="bi bi-star-fill me-1"></i><i class="bi bi-star-fill me-1"></i><i class="bi bi-star-fill"></i>
+                    </div>
+                    <p class="text-light small mb-3">"Oud Royale Extrait is sensational. Real Assam agarwood with a 18-hour dry down that leaves an unforgettable impression. Will definitely be a repeat buyer."</p>
+                    <div class="mt-auto pt-3 border-top border-secondary border-opacity-25 d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="fw-bold text-white small">Sameer Alvi</div>
+                            <small class="text-muted">Lucknow</small>
+                        </div>
+                        <span class="badge bg-success bg-opacity-25 text-success small"><i class="bi bi-patch-check-fill me-1"></i> Verified</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Integrated Storefront CRUD Callout -->
+    <div class="p-4 p-md-5 my-5 text-center" style="background: linear-gradient(180deg, #161820 0%, #101217 100%); border-radius: var(--aura-radius-lg); border: 1px solid var(--aura-gold-glow);">
+        <span class="badge-glow mb-2 d-inline-block">ADMIN / STORE MANAGER CRUD</span>
+        <h3 class="h3 fw-bold text-white mb-2">Want to manage catalog items, inventory & orders?</h3>
+        <p class="text-muted small max-w-500 mx-auto mb-4">
+            Experience our integrated full-featured Catalog Manager: Create new luxury drops, edit prices & stock, update descriptions, or remove items with instant SQL database updates.
+        </p>
+        <a href="{% url 'manage_products' %}" class="btn btn-aura-primary">
+            <i class="bi bi-database-check me-2"></i> Launch Storefront CRUD Manager
+        </a>
+    </div>
+</div>
+{% endblock %}
